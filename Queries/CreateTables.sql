@@ -27,7 +27,7 @@ CREATE TABLE Services (
     FOREIGN KEY (AddressId) REFERENCES Addresses (Id)
 );
 
-CREATE TABLE Quota (
+CREATE TABLE Quotas (
     Id INTEGER PRIMARY KEY AUTOINCREMENT,
     ServiceId INTEGER NOT NULL,
     Number INTEGER,

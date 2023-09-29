@@ -5,7 +5,12 @@ VisualStudioVersion = 17.7.34024.191
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppTester", "AppTester\AppTester.csproj", "{9325E5B6-9A46-4D0B-AA29-2396E51DABD7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServicesCalendarCore", "ServicesCalendar\ServicesCalendarCore.csproj", "{1A0ACFC1-ECDF-49E3-B786-BAE89ED1159A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Elementos de la solución", "Elementos de la solución", "{91A7D803-E2F2-4F34-ADB4-4050FC3B8020}"
+	ProjectSection(SolutionItems) = preProject
+		Queries\CreateTables.sql = Queries\CreateTables.sql
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServicesCalendarCore", "ServicesCalendarCore\ServicesCalendarCore.csproj", "{FB01F59D-1091-4FAE-89C1-65E29E9F85CD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +22,10 @@ Global
 		{9325E5B6-9A46-4D0B-AA29-2396E51DABD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9325E5B6-9A46-4D0B-AA29-2396E51DABD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9325E5B6-9A46-4D0B-AA29-2396E51DABD7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1A0ACFC1-ECDF-49E3-B786-BAE89ED1159A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1A0ACFC1-ECDF-49E3-B786-BAE89ED1159A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1A0ACFC1-ECDF-49E3-B786-BAE89ED1159A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1A0ACFC1-ECDF-49E3-B786-BAE89ED1159A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB01F59D-1091-4FAE-89C1-65E29E9F85CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB01F59D-1091-4FAE-89C1-65E29E9F85CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB01F59D-1091-4FAE-89C1-65E29E9F85CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB01F59D-1091-4FAE-89C1-65E29E9F85CD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

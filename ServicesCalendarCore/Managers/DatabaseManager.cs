@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
 using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.Common;
-using Dapper;
+using ServicesCalendarCore.Database;
+using Microsoft.EntityFrameworkCore;
+using ServicesCalendarCore.Models;
 
 namespace ServicesCalendarCore.Managers
 {
     public class DatabaseManager
     {
-        public IDbConnection _dbConnection;
+        public ServicesCalendarDbContext _dbContext;
+        
 
         public DatabaseManager() 
         {
-            string connectionString = "Data Source=D:\\Temp\\testDataBase.db;Version=3;";
-            _dbConnection = new SQLiteConnection(connectionString);
+            _dbContext = new ServicesCalendarDbContext();
         }
 
         #region Create
@@ -47,9 +48,10 @@ namespace ServicesCalendarCore.Managers
         }
         #endregion
         #region Read
-        public async Task GetUsers()
+        public async Task<List<User>> GetUsers()
         {
-
+            List<User> users = _dbContext.Users.ToList();
+            return users;   
         }
 
         public async Task GetAddresses()

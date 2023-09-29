@@ -21,8 +21,8 @@ CREATE TABLE Services (
     Name TEXT,
     Responsible_Name TEXT,
     Type TEXT,
-    Period TEXT,
-    Payed_Year INTEGER
+    Payment_Frequency TEXT,
+    Annual_Payment INTEGER,
     Client_Number TEXT,
     FOREIGN KEY (AddressId) REFERENCES Addresses (Id)
 );
@@ -33,7 +33,7 @@ CREATE TABLE Quotas (
     Number INTEGER,
     Month TEXT,
     Amount INTEGER,
-    Payment_Status CHAR(1),
+    Payment_Status INTEGER,
     Payed_Date TEXT,
     Expiration_Date TEXT,
     Bill_Voucher BLOB,

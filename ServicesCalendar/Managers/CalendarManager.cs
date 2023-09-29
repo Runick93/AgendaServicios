@@ -1,4 +1,4 @@
-﻿namespace ServicesCalendar.Managers
+﻿namespace ServicesCalendarCore.Managers
 {
     public class CalendarManager
     {

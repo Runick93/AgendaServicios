@@ -1,78 +1,167 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Data.Common;
+﻿using Microsoft.EntityFrameworkCore;
 using ServicesCalendarCore.Database;
-using Microsoft.EntityFrameworkCore;
 using ServicesCalendarCore.Models;
+
 
 namespace ServicesCalendarCore.Managers
 {
     public class DatabaseManager
     {
-        public ServicesCalendarDbContext _dbContext;
-        
+        private readonly ServicesCalendarDbContext _dbContext;
 
-        public DatabaseManager() 
+
+        public DatabaseManager()
         {
             _dbContext = new ServicesCalendarDbContext();
         }
 
+        public void Dispose()
+        {
+            _dbContext.Dispose();
+        }
+
         #region Create
-        public async Task CreateUser()
+        public void CreateUser(string name, string password)
         {
-            
-        }
-
-        public async Task CreateAddress()
-        {
-
-        }
-
-        public async Task CreateService()
-        {
-            //Quizas aca pueda usar un innerjoin con quotas... capaz...  tengo q pensar mejor esto.
-            //quizas me convenga usar entity
-            for (int i = 0; i <= 12; i++) 
+            try
             {
-                CreateQuota();
+                _dbContext.Database.EnsureCreated();
+                var newUser = new User
+                {
+                    Name = name,
+                    Password = password
+                };
+
+                _dbContext.Users.Add(newUser);
+                _dbContext.SaveChanges();
+                
+            }
+            catch (Exception) 
+            {                
+                throw;
             }
         }
 
-        public async Task CreateQuota()
+        public async Task CreateAddress(int currentUserId)
         {
+            var newAddress = new Address
+            {
+                UserId = currentUserId,
+                Name = "",
+                Street = "",
+                Number = 1,
+                Floor = 0,
+                Department = ""
+            };
 
+            _dbContext.Addresses.Add(newAddress);
+            _dbContext.SaveChanges();
         }
+
+        public async Task CreateService(int currentAddressId)
+        {
+            var newService = new Service
+            {
+                AddressId = currentAddressId,
+                Name = "",
+                Responsible_Name = "",
+                Type = "",
+                Payment_Frequency = "",
+                Annual_Payment = 0,
+                Client_Number = ""
+
+            };
+
+            _dbContext.Services.Add(newService);
+            _dbContext.SaveChanges();
+
+            for (int i = 0; i <= 12; i++)
+            {
+                CreateQuota(i, 3); //el segundo valor representaria el id del servicio  
+            }
+        }
+
+        public async Task CreateQuota(int quotaNumber, int currentServiceId)
+        {
+            var newQuota = new Quota
+            {
+                ServiceId = currentServiceId,
+                Number = quotaNumber,
+                Month = "",
+                Amount = 0,
+                Payment_Status = 0,
+                Payed_Date = "",
+                Expiration_Date = ""
+
+            };
+
+            _dbContext.Quotas.Add(newQuota);
+            _dbContext.SaveChanges();
+        }
+
+
         #endregion
         #region Read
-        public async Task<List<User>> GetUsers()
+        public async Task<User> GetUser(string nameFind)
         {
-            List<User> users = _dbContext.Users.ToList();
-            return users;   
+            return _dbContext.Users.FirstOrDefault(u => u.Name == nameFind);
         }
 
-        public async Task GetAddresses()
-        {
 
+        //public async Task<List<User>> GetUsers()
+        public List<User> GetUsers()
+        {
+            return _dbContext.Users.ToList();
         }
 
-        public async Task GetServices()
-        {
 
+        public async Task<Address> GetAddress(int id)
+        {
+            return _dbContext.Addresses.FirstOrDefault(a => a.Id == id);
         }
 
-        public async Task GetQuotas()
-        {
 
+        public async Task<List<Address>> GetAddresses()
+        {
+            return _dbContext.Addresses.ToList();
+        }
+
+
+        public async Task<Service> GetService(int id)
+        {
+            return _dbContext.Services.FirstOrDefault(s => s.Id == id);
+        }
+
+
+        public async Task<List<Service>> GetServices()
+        {
+            return _dbContext.Services.ToList();
+        }
+
+
+        public async Task<Quota> GetQuota(int id)
+        {
+            return _dbContext.Quotas.FirstOrDefault(q => q.Id == id);
+        }
+
+
+        public async Task<List<Quota>> GetQuotas()
+        {
+            return _dbContext.Quotas.ToList();
         }
         #endregion
         #region Update
-        public async Task UpdateUser()
+        public async Task UpdateUser(string name, string newPassword)
         {
-
+            using (var context = new ServicesCalendarDbContext())
+            {
+                var userToUpdate = context.Users.FirstOrDefault(u => u.Name == name);
+                if (userToUpdate != null)
+                {
+                    userToUpdate.Password = newPassword;
+                    context.SaveChanges();
+                }
+            }
         }
 
         public async Task UpdateAddress()

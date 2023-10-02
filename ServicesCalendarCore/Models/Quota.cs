@@ -1,16 +1,18 @@
-﻿namespace ServicesCalendarCore.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ServicesCalendarCore.Models
 {
     public  class Quota
     {
         public int Id { get; set; }
-        public int ServiceId { get; set; }
+        public int ServiceId { get; set; } public Service Service { get; set; }
         public int Number { get; set; }
-        public string Month { get; set; } = "";
+        public string? Month { get; set; }
         public int Amount { get; set; }
-        public int PaymentStatus { get; set; }
-        public string PayedDate { get; set; } = "";
-        public string ExpirationDate { get; set; } = "";
-        public Byte[] BillVoucher { get; set; }
-        public Byte[] PaymentVoucher { get; set; }
+        public int Payment_Status { get; set; }
+        public string? Payed_Date { get; set; }
+        public string? Expiration_Date { get; set; }
+        public Byte[]? Bill_Voucher { get; set; }
+        public Byte[]? Payment_Voucher { get; set; }
     }
 }

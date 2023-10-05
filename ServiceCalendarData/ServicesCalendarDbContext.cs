@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ServicesCalendarCore.Models;
+using ServicesCalendarData.Models;
 using System.Reflection;
 
-namespace ServicesCalendarCore.Database
+namespace ServicesCalendarData
 {
     public class ServicesCalendarDbContext : DbContext
     {

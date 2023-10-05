@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ServicesCalendarCore.Models
+namespace ServicesCalendarData.Models
 {
     public class Service
     {

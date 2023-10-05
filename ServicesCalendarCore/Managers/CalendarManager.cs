@@ -1,7 +1,5 @@
 ﻿using ServiceCalendarData.Interfaces;
-using ServicesCalendarData;
 using ServicesCalendarData.Managers;
-using ServicesCalendarData.Models;
 
 namespace ServicesCalendarCore.Managers
 {
@@ -49,15 +47,15 @@ namespace ServicesCalendarCore.Managers
 
                 var address = await _DataBaseManager.GetAddressAsync(1);
                 var userAddresses = await _DataBaseManager.GetUserAddressesAsync(1);
-                //var addresses = await _DataBaseManager.GetUserAsync();
+                var addresses = await _DataBaseManager.GetAddressesAsync();
 
                 var service = await _DataBaseManager.GetServiceAsync(1);
                 var addressServices = await _DataBaseManager.GetAddressServicesAsync(1);
-                //var services = await _DataBaseManager.GetServicesAsync();
+                var services = await _DataBaseManager.GetServicesAsync();
 
                 var quota = await _DataBaseManager.GetQuotaAsync(23);
                 var serviceQuotas = await _DataBaseManager.GetServiceQuotasAsync(8);
-                //var quotas = await _DataBaseManager.GetQuotasAsync();
+                var quotas = await _DataBaseManager.GetQuotasAsync();
 
 
                 //Updates

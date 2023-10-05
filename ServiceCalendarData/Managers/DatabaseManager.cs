@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using ServiceCalendarData.Interfaces;
 using ServicesCalendarData;
 using ServicesCalendarData.Models;
+using System.Data.Common;
 using System.Linq;
 
 namespace ServicesCalendarData.Managers
@@ -29,7 +30,7 @@ namespace ServicesCalendarData.Managers
         public DatabaseManager()
         {
             _dbContext = new ServicesCalendarDbContext();
-           //_dbContext.Database.EnsureCreated();
+           
         }
 
         public void Dispose()
@@ -37,12 +38,17 @@ namespace ServicesCalendarData.Managers
             _dbContext.Dispose();
         }
 
+        public void DbExist()
+        {
+            _dbContext.Database.EnsureCreated();
+        }
+
         #region Create
         public async Task CreateUserAsync(User newUser)
         {
             try
             {
-                if (_dbContext.Users.Any(a => a.Name == newUser.Name))
+                if (_dbContext.Users.Any(c => c.Name == newUser.Name))
                     throw new Exception("El usuario ya existe.");
 
                 _dbContext.Users.Add(newUser);
@@ -120,7 +126,7 @@ namespace ServicesCalendarData.Managers
         #region Read
         public async Task<User> GetUserAsync(string userName)
         {
-            return await _dbContext.Users.FirstOrDefaultAsync(u => u.Name == userName);
+            return await _dbContext.Users.FirstOrDefaultAsync(r => r.Name == userName);
         }
 
         public async Task<List<User>> GetUsersAsync()
@@ -128,15 +134,14 @@ namespace ServicesCalendarData.Managers
             return await _dbContext.Users.ToListAsync(); ;
         }
 
-
         public async Task<Address> GetAddressAsync(int id)
         {
-            return await _dbContext.Addresses.FirstOrDefaultAsync(a => a.Id == id);
+            return await _dbContext.Addresses.FirstOrDefaultAsync(r => r.Id == id);
         }
 
         public async Task<List<Address>> GetUserAddressesAsync(int userId)
         {
-            return await _dbContext.Addresses.Where(a => a.UserId == userId).ToListAsync();
+            return await _dbContext.Addresses.Where(r => r.UserId == userId).ToListAsync();
         }
 
         public async Task<List<Address>> GetAddressesAsync()
@@ -144,15 +149,14 @@ namespace ServicesCalendarData.Managers
             return await _dbContext.Addresses.ToListAsync();
         }
 
-
         public async Task<Service> GetServiceAsync(int id)
         {
-            return await _dbContext.Services.FirstOrDefaultAsync(s => s.Id == id);
+            return await _dbContext.Services.FirstOrDefaultAsync(r => r.Id == id);
         }
 
         public async Task<List<Service>> GetAddressServicesAsync(int addressId)
         {
-            return await _dbContext.Services.Where(a => a.AddressId == addressId).ToListAsync();
+            return await _dbContext.Services.Where(r => r.AddressId == addressId).ToListAsync();
         }
 
         public async Task<List<Service>> GetServicesAsync()
@@ -160,15 +164,14 @@ namespace ServicesCalendarData.Managers
             return await _dbContext.Services.ToListAsync();
         }
 
-
         public async Task<Quota> GetQuotaAsync(int id)
         {
-            return await _dbContext.Quotas.FirstOrDefaultAsync(q => q.Id == id);
+            return await _dbContext.Quotas.FirstOrDefaultAsync(r => r.Id == id);
         }
 
         public async Task<List<Quota>> GetServiceQuotasAsync(int serviceId)
         {
-            return await _dbContext.Quotas.Where(a => a.ServiceId == serviceId).ToListAsync();
+            return await _dbContext.Quotas.Where(r => r.ServiceId == serviceId).ToListAsync();
         }
 
         public async Task<List<Quota>> GetQuotasAsync()
@@ -178,48 +181,62 @@ namespace ServicesCalendarData.Managers
         #endregion
 
         #region Update
-        public async Task UpdateUserAsync(User userUpdate)
+        public async Task UpdateUserAsync(User updatedUser)
         {
             try
-            { 
-                User userToUpdate = await _dbContext.Users.FirstOrDefaultAsync(u => u.Name == userUpdate.Name);
-                if (userToUpdate != null)
-                {
-                    if(userToUpdate.Password != userUpdate.Password)
-                        userToUpdate.Password = userUpdate.Password;
-                    await _dbContext.SaveChangesAsync();
-                }
+            {                
+                if (updatedUser == null)                
+                    throw new ArgumentNullException(nameof(updatedUser), "El usuario a actualizar no puede ser nulo.");                
+
+                User foundUser = await _dbContext.Users.SingleOrDefaultAsync(u => u.Name == updatedUser.Name).ConfigureAwait(false);
+
+                if (foundUser == null)                
+                    throw new Exception("No se encontró el usuario para modificar"); //definir una excepcion custom.
+            
+                if (foundUser.Password != updatedUser.Password)                
+                    foundUser.Password = updatedUser.Password;                           
+
+                if (_dbContext.ChangeTracker.HasChanges())                
+                    await _dbContext.SaveChangesAsync().ConfigureAwait(false);                
             }
-            catch (Exception ex)
+            catch (DbException ex)
             {
                 throw;
             }
         }
 
-        public async Task UpdateAddressAsync(Address addressUpdate)
+
+
+        public async Task UpdateAddressAsync(Address updatedAddress)
         {
             try
-            { 
-                Address addressToUpdate = await _dbContext.Addresses.FirstOrDefaultAsync(u => u.Id == addressUpdate.Id);
-                if (addressToUpdate != null)
-                {
-                    if (addressToUpdate.Name != addressUpdate.Name)                
-                        addressToUpdate.Name = addressUpdate.Name;                
+            {
+                if (updatedAddress == null)
+                    throw new ArgumentNullException(nameof(updatedAddress), "El domicilio a actualizar no puede ser nulo.");
 
-                    if (addressToUpdate.Street != addressUpdate.Street)                
-                        addressToUpdate.Street = addressUpdate.Street;                
+                Address foundAddress = await _dbContext.Addresses.FirstOrDefaultAsync(u => u.Id == updatedAddress.Id);
 
-                    if (addressToUpdate.Number != addressUpdate.Number)                
-                        addressToUpdate.Number = addressUpdate.Number;                
+                if (foundAddress == null)
+                    throw new Exception("No se encontró el domicilio para modificar"); //definir una excepcion custom.
 
-                    if (addressToUpdate.Floor != addressUpdate.Floor)                
-                        addressToUpdate.Floor = addressUpdate.Floor;                
+                if (foundAddress.Name != updatedAddress.Name)                
+                    foundAddress.Name = updatedAddress.Name;                
 
-                    if (addressToUpdate.Department != addressUpdate.Department)                
-                        addressToUpdate.Department = addressUpdate.Department;                
+                if (foundAddress.Street != updatedAddress.Street)                
+                    foundAddress.Street = updatedAddress.Street;                
 
-                    await _dbContext.SaveChangesAsync();
-                }
+                if (foundAddress.Number != updatedAddress.Number)                
+                    foundAddress.Number = updatedAddress.Number;                
+
+                if (foundAddress.Floor != updatedAddress.Floor)                
+                    foundAddress.Floor = updatedAddress.Floor;                
+
+                if (foundAddress.Department != updatedAddress.Department)                
+                    foundAddress.Department = updatedAddress.Department;                
+
+                if (_dbContext.ChangeTracker.HasChanges())
+                    await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+
             }
             catch (Exception ex)
             {
@@ -227,34 +244,39 @@ namespace ServicesCalendarData.Managers
             }
         }
 
-        public async Task UpdateServiceAsync(Service serviceUpdate)
+        public async Task UpdateServiceAsync(Service updatedService)
         {
             try
             {
-                Service serviceToUpdate = await _dbContext.Services.FirstOrDefaultAsync(u => u.Id == serviceUpdate.Id);
+                if (updatedService == null)
+                    throw new ArgumentNullException(nameof(updatedService), "El servicio a actualizar no puede ser nulo.");
 
-                if (serviceToUpdate != null)
-                {
-                    if (serviceToUpdate.Name != serviceUpdate.Name)
-                        serviceToUpdate.Name = serviceUpdate.Name;
+                Service foundService = await _dbContext.Services.FirstOrDefaultAsync(u => u.Id == updatedService.Id);
 
-                    if (serviceToUpdate.Responsible_Name != serviceUpdate.Responsible_Name)
-                        serviceToUpdate.Responsible_Name = serviceUpdate.Responsible_Name;
+                if (foundService == null)
+                    throw new Exception("No se encontró el servicio para modificar"); //definir una excepcion custom.
 
-                    if (serviceToUpdate.Type != serviceUpdate.Type)
-                        serviceToUpdate.Type = serviceUpdate.Type;
+                if (foundService.Name != updatedService.Name)
+                    foundService.Name = updatedService.Name;
 
-                    if (serviceToUpdate.Payment_Frequency != serviceUpdate.Payment_Frequency)
-                        serviceToUpdate.Payment_Frequency = serviceUpdate.Payment_Frequency;
+                if (foundService.Responsible_Name != updatedService.Responsible_Name)
+                    foundService.Responsible_Name = updatedService.Responsible_Name;
 
-                    if (serviceToUpdate.Annual_Payment != serviceUpdate.Annual_Payment)
-                        serviceToUpdate.Annual_Payment = serviceUpdate.Annual_Payment;
+                if (foundService.Type != updatedService.Type)
+                    foundService.Type = updatedService.Type;
 
-                    if (serviceToUpdate.Client_Number != serviceUpdate.Client_Number)
-                        serviceToUpdate.Client_Number = serviceUpdate.Client_Number;
+                if (foundService.Payment_Frequency != updatedService.Payment_Frequency)
+                    foundService.Payment_Frequency = updatedService.Payment_Frequency;
 
-                    await _dbContext.SaveChangesAsync();
-                }
+                if (foundService.Annual_Payment != updatedService.Annual_Payment)
+                    foundService.Annual_Payment = updatedService.Annual_Payment;
+
+                if (foundService.Client_Number != updatedService.Client_Number)
+                    foundService.Client_Number = updatedService.Client_Number;
+
+                if (_dbContext.ChangeTracker.HasChanges())
+                    await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+
             }
             catch (Exception ex)
             {
@@ -262,34 +284,39 @@ namespace ServicesCalendarData.Managers
             }
         }
 
-        public async Task UpdateQuotaAsync(Quota quotaUpdate)
+        public async Task UpdateQuotaAsync(Quota updatedQuota)
         {
             try
             {
-                Quota quotaToUpdate = await _dbContext.Quotas.FirstOrDefaultAsync(u => u.Number == quotaUpdate.Number);
+                if (updatedQuota == null)
+                    throw new ArgumentNullException(nameof(updatedQuota), "La cuota a actualizar no puede ser nula.");
 
-                if (quotaToUpdate != null)
-                {
-                    if (quotaToUpdate.Amount != quotaUpdate.Amount)
-                        quotaToUpdate.Amount = quotaUpdate.Amount;
+                Quota foundQuota = await _dbContext.Quotas.FirstOrDefaultAsync(u => u.Number == updatedQuota.Number);
 
-                    if (quotaToUpdate.Payment_Status != quotaUpdate.Payment_Status)
-                        quotaToUpdate.Payment_Status = quotaUpdate.Payment_Status;
+                if (foundQuota == null)
+                    throw new Exception("No se encontró la cuota para modificar"); //definir una excepcion custom
 
-                    if (quotaToUpdate.Payed_Date != quotaUpdate.Payed_Date)
-                        quotaToUpdate.Payed_Date = quotaUpdate.Payed_Date;
+                if (foundQuota.Amount != updatedQuota.Amount)
+                    foundQuota.Amount = updatedQuota.Amount;
 
-                    if (quotaToUpdate.Expiration_Date != quotaUpdate.Expiration_Date)
-                        quotaToUpdate.Expiration_Date = quotaUpdate.Expiration_Date;
+                if (foundQuota.Payment_Status != updatedQuota.Payment_Status)
+                    foundQuota.Payment_Status = updatedQuota.Payment_Status;
 
-                    if (quotaToUpdate.Bill_Voucher != quotaUpdate.Bill_Voucher)
-                        quotaToUpdate.Bill_Voucher = quotaUpdate.Bill_Voucher;
+                if (foundQuota.Payed_Date != updatedQuota.Payed_Date)
+                    foundQuota.Payed_Date = updatedQuota.Payed_Date;
 
-                    if (quotaToUpdate.Payment_Voucher != quotaUpdate.Payment_Voucher)
-                        quotaToUpdate.Payment_Voucher = quotaUpdate.Payment_Voucher;
+                if (foundQuota.Expiration_Date != updatedQuota.Expiration_Date)
+                    foundQuota.Expiration_Date = updatedQuota.Expiration_Date;
 
-                    await _dbContext.SaveChangesAsync();
-                }
+                if (foundQuota.Bill_Voucher != updatedQuota.Bill_Voucher)
+                    foundQuota.Bill_Voucher = updatedQuota.Bill_Voucher;
+
+                if (foundQuota.Payment_Voucher != updatedQuota.Payment_Voucher)
+                    foundQuota.Payment_Voucher = updatedQuota.Payment_Voucher;
+
+                if (_dbContext.ChangeTracker.HasChanges())
+                    await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+
             }
             catch (Exception ex)
             {
@@ -299,17 +326,20 @@ namespace ServicesCalendarData.Managers
         #endregion
 
         #region Delete
-        public async Task DeleteUserAsync(User UserDelete)
+        public async Task DeleteUserAsync(User deleteUser)
         {
             try 
-            { 
-                var userToDelete = _dbContext.Users.FirstOrDefault(e => e.Name == UserDelete.Name);
+            {
+                if (deleteUser == null)                
+                    throw new ArgumentNullException(nameof(deleteUser), "El objeto a eliminar no puede ser nulo.");
+                
+                var foundUser = await _dbContext.Users.SingleOrDefaultAsync(e => e.Name == deleteUser.Name).ConfigureAwait(false);
 
-                if (userToDelete != null)
-                {
-                    _dbContext.Users.Remove(userToDelete);
-                    await _dbContext.SaveChangesAsync();
-                }
+                if (foundUser == null)                
+                    throw new Exception("No se encontro el objeto a eliminar");
+                
+                _dbContext.Users.Remove(foundUser);
+                await _dbContext.SaveChangesAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -317,17 +347,20 @@ namespace ServicesCalendarData.Managers
             }
         }
 
-        public async Task DeleteAddressAsync(Address addressDelete)
+        public async Task DeleteAddressAsync(Address deleteAddress)
         {
             try 
-            { 
-                var addressToDelete = _dbContext.Addresses.FirstOrDefault(e => e.Name == addressDelete.Name);
+            {
+                if (deleteAddress == null)
+                    throw new ArgumentNullException(nameof(deleteAddress), "El objeto a eliminar no puede ser nulo.");
 
-                if (addressToDelete != null)
-                {
-                    _dbContext.Addresses.Remove(addressToDelete);
-                    await _dbContext.SaveChangesAsync();
-                }
+                var foundAddress = await _dbContext.Addresses.SingleOrDefaultAsync(e => e.Id == deleteAddress.Id).ConfigureAwait(false);
+
+                if (foundAddress == null)                
+                    throw new Exception("No se encontro el objeto a eliminar");
+                
+                _dbContext.Addresses.Remove(foundAddress);
+                await _dbContext.SaveChangesAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -335,17 +368,20 @@ namespace ServicesCalendarData.Managers
             }
         }
 
-        public async Task DeleteServiceAsync(Service serviceDelete)
+        public async Task DeleteServiceAsync(Service deleteService)
         {
             try
-            { 
-                var serviceToDelete = _dbContext.Services.FirstOrDefault(e => e.Name == serviceDelete.Name);
+            {
+                if (deleteService == null)
+                    throw new ArgumentNullException(nameof(deleteService), "El objeto a eliminar no puede ser nulo.");
 
-                if (serviceToDelete != null)
-                {
-                    _dbContext.Services.Remove(serviceToDelete);
-                    await _dbContext.SaveChangesAsync();
-                }
+                var serviceToDelete = await _dbContext.Services.SingleOrDefaultAsync(e => e.Id == deleteService.Id);
+
+                if (serviceToDelete == null)
+                    throw new Exception("No se encontro el objeto a eliminar");
+
+                _dbContext.Services.Remove(serviceToDelete);
+                await _dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -353,17 +389,20 @@ namespace ServicesCalendarData.Managers
             }
         }
 
-        public async Task DeleteQuotaAsync(Quota quotaDelete)
+        public async Task DeleteQuotaAsync(Quota deleteQuota)
         {
             try
-            { 
-                var quotaToDelete = _dbContext.Quotas.FirstOrDefault(e => e.Id == quotaDelete.Id);
+            {
+                if (deleteQuota == null)
+                    throw new ArgumentNullException(nameof(deleteQuota), "El objeto a eliminar no puede ser nulo.");
 
-                if (quotaToDelete != null)
-                {
-                    _dbContext.Quotas.Remove(quotaToDelete);
-                    await _dbContext.SaveChangesAsync();
-                }
+                var quotaToDelete = await _dbContext.Quotas.SingleOrDefaultAsync(e => e.Id == deleteQuota.Id);
+
+                if (quotaToDelete == null)
+                    throw new Exception("No se encontro el objeto a eliminar");
+
+                _dbContext.Quotas.Remove(quotaToDelete);
+                await _dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
